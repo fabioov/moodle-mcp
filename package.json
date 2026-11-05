@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Open source MCP server for Moodle (read-only): assignments, deadlines, grades, courses and more.",
   "license": "MIT",
-  "author": "fabioov (https://github.com/fabioov)",
+  "author": "Fabio Santos - fabioov (https://github.com/fabioov)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fabioov/moodle-mcp.git"

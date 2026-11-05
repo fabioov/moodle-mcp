@@ -5,7 +5,7 @@ All notable changes to this project are documented here. Format based on
 
 ## [Unreleased]
 
-## [0.1.0]
+## [0.1.0] - 2026-11-05
 ### Added
 - Read-only MCP server for Moodle with 9 tools: `get_site_info`, `list_courses`, `get_course_contents`,
   `list_assignments`, `get_assignment_status`, `get_upcoming_deadlines`, `get_grades`,
