@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.fabioov/moodle-mcp",
+  "title": "Moodle MCP",
+  "description": "Read-only Moodle server: assignments, deadlines, grades, courses, forums, notifications.",
+  "repository": {
+    "url": "https://github.com/fabioov/moodle-mcp",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@fabioov/moodle-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "MCP_TRANSPORT",
+          "description": "Run over stdio for local clients",
+          "value": "stdio"
+        },
+        {
+          "name": "MOODLE_URL",
+          "description": "Root URL of your Moodle site, e.g. https://moodle.example.edu",
+          "isRequired": true
+        },
+        {
+          "name": "MOODLE_TOKEN",
+          "description": "Your Moodle web service token (Preferences > Security keys)",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

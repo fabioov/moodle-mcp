@@ -1,6 +1,7 @@
 {
-  "name": "moodle-mcp",
-  "version": "0.1.0",
+  "name": "@fabioov/moodle-mcp",
+  "version": "0.1.1",
+  "mcpName": "io.github.fabioov/moodle-mcp",
   "description": "Open source MCP server for Moodle (read-only): assignments, deadlines, grades, courses and more.",
   "license": "MIT",
   "author": "Fabio Santos - fabioov (https://github.com/fabioov)",
@@ -31,6 +32,9 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",

@@ -5,6 +5,10 @@ All notable changes to this project are documented here. Format based on
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-05
+### Changed
+- Published as `@fabioov/moodle-mcp` on npm (run locally with `npx -y @fabioov/moodle-mcp`); added `server.json` for the MCP Registry.
+
 ## [0.1.0] - 2026-11-05
 ### Added
 - Read-only MCP server for Moodle with 9 tools: `get_site_info`, `list_courses`, `get_course_contents`,

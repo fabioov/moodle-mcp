@@ -69,8 +69,11 @@ docker build -t moodle-mcp . && docker run --env-file .env -p 3000:3000 moodle-m
 ```
 Then expose it over HTTPS (for example with a Cloudflare Tunnel or Tailscale Funnel).
 
-**Local only (Claude Desktop / Claude Code, stdio):** `MCP_TRANSPORT=stdio node dist/index.js` with
-`MOODLE_URL` and `MOODLE_TOKEN` set. `MCP_AUTH_SECRET` is not needed in this mode.
+**Local only (Claude Desktop / Claude Code, stdio):** no install needed:
+```bash
+MCP_TRANSPORT=stdio MOODLE_URL=https://your.moodle.edu MOODLE_TOKEN=... npx -y @fabioov/moodle-mcp
+```
+`MCP_AUTH_SECRET` is not needed in this mode.
 
 ### 4. Add it to Claude
 - **Claude.ai:** *Settings → Connectors → Add custom connector*. URL `https://<your-host>/mcp`, choose
