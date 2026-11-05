@@ -11,7 +11,12 @@ export interface MoodleConfig {
 }
 
 export class MoodleClient {
-  constructor(private cfg: MoodleConfig, private fetchImpl: typeof fetch = fetch) {}
+  // Call the global fetch through a wrapper: storing `fetch` and calling it as `this.fetchImpl(...)`
+  // throws "Illegal invocation" on Cloudflare Workers.
+  constructor(
+    private cfg: MoodleConfig,
+    private fetchImpl: typeof fetch = (...args) => globalThis.fetch(...args),
+  ) {}
 
   async call<T = unknown>(wsfunction: string, params: Record<string, unknown> = {}): Promise<T> {
     const body = new URLSearchParams({

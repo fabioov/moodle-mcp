@@ -20,6 +20,22 @@ assignments, deadlines, grades, courses, forums and notifications.
      the header is preferred because URLs end up in logs).
    - Generate a strong secret: `openssl rand -hex 24`.
 
+### Deploy on Cloudflare Workers (free, always on, no domain needed)
+Runs on `https://moodle-mcp.<your-subdomain>.workers.dev`, so your computer doesn't need to stay on.
+You need a free Cloudflare account (check Cloudflare's current free-tier limits).
+
+```bash
+npm ci
+npx wrangler login
+npx wrangler secret put MOODLE_URL        # https://your.moodle.edu
+npx wrangler secret put MOODLE_TOKEN      # your Moodle web service token
+npx wrangler secret put MCP_AUTH_SECRET   # openssl rand -hex 24
+npm run deploy
+```
+Then add `https://moodle-mcp.<your-subdomain>.workers.dev/mcp` as a custom connector (see above).
+Secrets are stored by Cloudflare and never go in the repo. To try it locally first, copy your `.env` values
+to a `.dev.vars` file (git-ignored) and run `npm run dev:worker`.
+
 For Claude Desktop / Claude Code (local): set `MCP_TRANSPORT=stdio`.
 
 ## Security

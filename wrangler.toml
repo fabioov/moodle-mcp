@@ -1,0 +1,9 @@
+name = "moodle-mcp"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# Secrets (never put these in this file). Set them with:
+#   npx wrangler secret put MOODLE_URL
+#   npx wrangler secret put MOODLE_TOKEN
+#   npx wrangler secret put MCP_AUTH_SECRET

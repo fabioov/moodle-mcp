@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { MoodleClient, MoodleError, appendParams } from "../src/moodle/client.js";
 
 const mk = (payload: unknown, status = 200) =>
@@ -23,5 +23,18 @@ describe("MoodleClient", () => {
   });
   it("fails on HTTP errors", async () => {
     await expect(mk({}, 500).call("x")).rejects.toThrow(/500/);
+  });
+  it("uses the global fetch when none is injected, without losing its `this` (Cloudflare Workers)", async () => {
+    const seen: unknown[] = [];
+    vi.stubGlobal("fetch", function (this: unknown) {
+      seen.push(this);
+      return Promise.resolve(new Response(JSON.stringify({ ok: 1 })));
+    });
+    try {
+      expect(await new MoodleClient({ url: "https://m.test", token: "t" }).call("x")).toEqual({ ok: 1 });
+      expect(seen[0]).toBe(globalThis);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
