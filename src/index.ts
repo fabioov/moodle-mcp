@@ -21,9 +21,17 @@ if (process.env.MCP_TRANSPORT === "stdio") {
   const app = express();
   app.use(express.json());
 
+  // Auth: `Authorization: Bearer <secret>` header, or the secret as a URL path
+  // segment (/mcp/<secret>) for clients that can only be given a URL (Claude.ai connectors).
+  const matches = (v: string) => {
+    const got = Buffer.from(v);
+    return got.length === secret.length && timingSafeEqual(got, secret);
+  };
+  const authorized = (req: express.Request) =>
+    matches((req.header("authorization") ?? "").replace(/^Bearer /, "")) ||
+    matches(decodeURIComponent(req.path.replace(/^\//, "")));
   app.use("/mcp", (req, res, next) => {
-    const got = Buffer.from((req.header("authorization") ?? "").replace(/^Bearer /, ""));
-    if (got.length !== secret.length || !timingSafeEqual(got, secret)) {
+    if (!authorized(req)) {
       res.status(401).json({ error: "unauthorized" });
       return;
     }
@@ -31,15 +39,15 @@ if (process.env.MCP_TRANSPORT === "stdio") {
   });
 
   // Stateless: a fresh server/transport per request
-  app.post("/mcp", async (req, res) => {
+  app.post(["/mcp", "/mcp/:secret"], async (req, res) => {
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
     res.on("close", () => transport.close());
     await createServer(moodle).connect(transport);
     await transport.handleRequest(req, res, req.body);
   });
-  app.all("/mcp", (_req, res) => res.status(405).json({ error: "method not allowed" }));
+  app.all(["/mcp", "/mcp/:secret"], (_req, res) => res.status(405).json({ error: "method not allowed" }));
   app.get("/health", (_req, res) => res.json({ ok: true }));
 
   const port = Number(process.env.PORT ?? 3000);
-  app.listen(port, () => console.error(`moodle-mcp listening on :${port}/mcp`));
+  app.listen(port, () => console.error(`moodle-mcp listening on :${port}`));
 }
