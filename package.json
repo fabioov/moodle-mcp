@@ -3,20 +3,44 @@
   "version": "0.1.0",
   "description": "Open source MCP server for Moodle (read-only): assignments, deadlines, grades, courses and more.",
   "license": "MIT",
+  "author": "fabioov (https://github.com/fabioov)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabioov/moodle-mcp.git"
+  },
+  "homepage": "https://github.com/fabioov/moodle-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/fabioov/moodle-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "moodle",
+    "claude",
+    "lms",
+    "cloudflare-workers",
+    "education"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "moodle-mcp": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy",
-    "check:worker": "wrangler deploy --dry-run --outdir .wrangler/dry-run"
+    "check:worker": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "engines": {
     "node": ">=20"
