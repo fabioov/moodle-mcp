@@ -2,6 +2,8 @@ name = "moodle-mcp"
 main = "src/worker.ts"
 compatibility_date = "2026-10-01"
 workers_dev = true
+# Only the main workers.dev URL; no extra preview URLs exposing the endpoint
+preview_urls = false
 
 # Secrets (never put these in this file). Set them with:
 #   npx wrangler secret put MOODLE_URL
