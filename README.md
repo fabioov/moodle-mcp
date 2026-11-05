@@ -13,8 +13,11 @@ assignments, deadlines, grades, courses, forums and notifications.
 2. Configure env (see `.env.example`): `MOODLE_URL`, `MOODLE_TOKEN`, `MCP_AUTH_SECRET`.
 3. Run: `npm ci && npm run build && npm start` or `docker build -t moodle-mcp . && docker run --env-file .env -p 3000:3000 moodle-mcp`.
 4. Expose the server over HTTPS (e.g. Cloudflare Tunnel) and add it as a custom connector in Claude.
-   - **Claude.ai connector** (URL only): use `https://<your-host>/mcp/<MCP_AUTH_SECRET>`. Treat that URL as a password.
-   - **Other clients** (Claude Code, etc.): `https://<your-host>/mcp` with `Authorization: Bearer <MCP_AUTH_SECRET>`.
+   - **Claude.ai** (Settings → Connectors → Add custom connector): URL `https://<your-host>/mcp`, choose
+     *No sign-in*, then *Add header* `Authorization: Bearer <MCP_AUTH_SECRET>`.
+   - **Claude Code and other clients:** same URL and header.
+   - If a client can only be given a URL, use `https://<your-host>/mcp/<MCP_AUTH_SECRET>` (treat it as a password;
+     the header is preferred because URLs end up in logs).
    - Generate a strong secret: `openssl rand -hex 24`.
 
 For Claude Desktop / Claude Code (local): set `MCP_TRANSPORT=stdio`.
