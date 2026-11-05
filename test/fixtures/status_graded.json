@@ -1,0 +1,28 @@
+{
+  "lastattempt": {
+    "gradingstatus": "graded",
+    "submission": {
+      "status": "submitted",
+      "timemodified": 1792490400
+    }
+  },
+  "feedback": {
+    "grade": {
+      "grade": "85.00000"
+    },
+    "plugins": [
+      {
+        "type": "comments",
+        "editorfields": [
+          {
+            "name": "comments",
+            "text": "Good work"
+          }
+        ]
+      },
+      {
+        "type": "file"
+      }
+    ]
+  }
+}

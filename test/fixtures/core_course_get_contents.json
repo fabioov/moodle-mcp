@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "General",
+    "modules": [
+      {
+        "id": 501,
+        "instance": 11,
+        "name": "Announcements",
+        "modname": "forum",
+        "url": "https://moodle.test/mod/forum/view.php?id=501"
+      },
+      {
+        "id": 502,
+        "instance": 12,
+        "name": "Welcome",
+        "modname": "label"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Week 1",
+    "modules": [
+      {
+        "id": 503,
+        "instance": 21,
+        "name": "Task 1",
+        "modname": "assign",
+        "url": "https://moodle.test/mod/assign/view.php?id=503"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Empty section"
+  }
+]

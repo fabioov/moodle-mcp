@@ -1,0 +1,40 @@
+{
+  "courses": [
+    {
+      "id": 101,
+      "fullname": "Machine Learning 2026",
+      "assignments": [
+        {
+          "id": 1,
+          "name": "Task old",
+          "duedate": 1790812800,
+          "cutoffdate": 0
+        },
+        {
+          "id": 2,
+          "name": "Task soon",
+          "duedate": 1794268800,
+          "cutoffdate": 0
+        },
+        {
+          "id": 3,
+          "name": "No due date",
+          "duedate": 0,
+          "cutoffdate": 0
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "fullname": "Computer Graphics 2026",
+      "assignments": [
+        {
+          "id": 4,
+          "name": "Task later",
+          "duedate": 1796083200,
+          "cutoffdate": 1796169600
+        }
+      ]
+    }
+  ]
+}

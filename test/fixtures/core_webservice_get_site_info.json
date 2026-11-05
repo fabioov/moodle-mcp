@@ -1,0 +1,12 @@
+{
+  "sitename": "Example University",
+  "release": "4.5.1 (Build: 20250101)",
+  "userid": 42,
+  "fullname": "Ada Student",
+  "username": "ada",
+  "functions": [
+    {
+      "name": "x"
+    }
+  ]
+}

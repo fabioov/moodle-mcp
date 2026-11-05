@@ -1,0 +1,22 @@
+{
+  "events": [
+    {
+      "name": "Task later está marcado(a) para esta data",
+      "timesort": 1796083200,
+      "modulename": "assign",
+      "course": {
+        "fullname": "Computer Graphics 2026"
+      },
+      "url": "https://moodle.test/mod/assign/view.php?id=9"
+    },
+    {
+      "name": "Quiz 1 closes",
+      "timesort": 1794441600,
+      "modulename": "quiz",
+      "course": {
+        "fullname": "Machine Learning 2026"
+      },
+      "url": "https://moodle.test/mod/quiz/view.php?id=8"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 101,
+    "shortname": "ML-101",
+    "fullname": "Machine Learning 2026",
+    "progress": 12.5,
+    "enddate": 0
+  },
+  {
+    "id": 102,
+    "shortname": "CG-201",
+    "fullname": "Computer Graphics 2026",
+    "progress": 50,
+    "enddate": 1797724800
+  },
+  {
+    "id": 103,
+    "shortname": "OLD-1",
+    "fullname": "Old Course 2024",
+    "progress": 100,
+    "enddate": 1719705600
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "usergrades": [
+    {
+      "gradeitems": [
+        {
+          "itemname": "Task 1",
+          "gradeformatted": "85,00",
+          "rangeformatted": "0&ndash;100",
+          "percentageformatted": "85,00 %"
+        },
+        {
+          "itemname": null,
+          "gradeformatted": "85,00",
+          "rangeformatted": "0&ndash;100",
+          "percentageformatted": "85,00 %"
+        }
+      ]
+    }
+  ]
+}
