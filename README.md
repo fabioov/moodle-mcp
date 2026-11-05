@@ -33,7 +33,7 @@ All tools are read-only and return concise, readable output.
 ## Requirements
 - A Moodle site with **Web Services / mobile app access enabled** (Moodle 4.x; developed against 4.5).
 - Your own **web service token** (below). Functions your institution disables simply return an error for that tool.
-- Node 20+ (or Docker, or a free Cloudflare account).
+- Node 20+ for the server (Node 22+ to deploy with Wrangler), or Docker, or a free Cloudflare account.
 
 ## Setup
 ### 1. Get your Moodle URL and token
