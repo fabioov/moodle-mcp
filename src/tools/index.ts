@@ -4,6 +4,9 @@ import type { MoodleClient } from "../moodle/client.js";
 import { MoodleError } from "../moodle/client.js";
 
 const iso = (ts?: number) => (ts ? new Date(ts * 1000).toISOString() : null);
+const decode = (s: string) =>
+  s.replace(/&ndash;/g, "–").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#0?39;/g, "'");
+const stripHtml = (s?: string) => (s ? decode(s.replace(/<[^>]*>/g, " ")).replace(/\s+/g, " ").trim() : s);
 const text = (data: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] });
 const fail = (e: unknown) => ({
   isError: true,
@@ -27,21 +30,25 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
 
   server.registerTool(
     "list_courses",
-    { description: "List the courses the user is enrolled in." },
-    () => safe(async () => {
-      const c = await moodle.call<any[]>("core_enrol_get_users_courses", { userid: await getUserId() });
+    {
+      description: "List the user's courses. By default only current ones (not ended); set includePast to see all.",
+      inputSchema: { includePast: z.boolean().optional() },
+    },
+    ({ includePast }) => safe(async () => {
+      const c = (await moodle.call<any[]>("core_enrol_get_users_courses", { userid: await getUserId() }))
+        .filter((x) => includePast || !x.enddate || x.enddate > Date.now() / 1000);
       return c.map((x) => ({ id: x.id, shortname: x.shortname, fullname: x.fullname, progress: x.progress, enddate: iso(x.enddate) }));
     }),
   );
 
   server.registerTool(
     "get_course_contents",
-    { description: "List sections and activities of a course.", inputSchema: { courseId: z.number().int() } },
+    { description: "List sections and activities of a course. `instance` is the id other tools need (e.g. forumId for list_forum_discussions).", inputSchema: { courseId: z.number().int() } },
     ({ courseId }) => safe(async () => {
       const s = await moodle.call<any[]>("core_course_get_contents", { courseid: courseId });
       return s.map((x) => ({
         section: x.name,
-        modules: (x.modules ?? []).map((m: any) => ({ id: m.id, name: m.name, type: m.modname, url: m.url })),
+        modules: (x.modules ?? []).map((m: any) => ({ id: m.id, instance: m.instance, name: m.name, type: m.modname, url: m.url })),
       }));
     }),
   );
@@ -49,10 +56,10 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
   server.registerTool(
     "list_assignments",
     {
-      description: "List assignments with due dates. Optionally filter by course and/or only those due from now on.",
-      inputSchema: { courseId: z.number().int().optional(), upcomingOnly: z.boolean().optional() },
+      description: "List assignments with due dates. Upcoming ones are sorted soonest first; otherwise most recent first. Filter by course; `limit` defaults to 25.",
+      inputSchema: { courseId: z.number().int().optional(), upcomingOnly: z.boolean().optional(), limit: z.number().int().min(1).max(200).default(25) },
     },
-    ({ courseId, upcomingOnly }) => safe(async () => {
+    ({ courseId, upcomingOnly, limit }) => safe(async () => {
       const r = await moodle.call<any>("mod_assign_get_assignments", { courseids: courseId ? [courseId] : [] });
       const now = Date.now() / 1000;
       return r.courses.flatMap((c: any) =>
@@ -62,7 +69,10 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
             id: a.id, course: c.fullname, courseId: c.id, name: a.name,
             due: iso(a.duedate), cutoff: iso(a.cutoffdate),
           })),
-      ).sort((a: any, b: any) => (a.due ?? "9").localeCompare(b.due ?? "9"));
+      ).sort((a: any, b: any) => upcomingOnly
+          ? (a.due ?? "9").localeCompare(b.due ?? "9")
+          : (b.due ?? "").localeCompare(a.due ?? ""))
+        .slice(0, limit);
     }),
   );
 
@@ -74,6 +84,7 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
       const s = r.lastattempt?.submission;
       return {
         submissionStatus: s?.status ?? "none",
+        gradingStatus: r.lastattempt?.gradingstatus,
         lastModified: iso(s?.timemodified),
         graded: r.feedback?.grade?.grade ?? null,
         feedbackComments: r.feedback?.plugins?.flatMap((p: any) => p.editorfields?.map((f: any) => f.text) ?? []) ?? [],
@@ -89,7 +100,7 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
       const r = await moodle.call<any>("core_calendar_get_action_events_by_timesort", {
         timesortfrom: from, timesortto: from + days * 86400, limitnum: 50,
       });
-      return r.events.map((e: any) => ({ name: e.name, course: e.course?.fullname, due: iso(e.timesort), url: e.url, type: e.modulename }));
+      return r.events.map((e: any) => ({ name: e.name.replace(/ está marcado\(a\) para esta data$/, ""), course: e.course?.fullname, due: iso(e.timesort), url: e.url, type: e.modulename }));
     }),
   );
 
@@ -99,17 +110,17 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
     ({ courseId }) => safe(async () => {
       const r = await moodle.call<any>("gradereport_user_get_grade_items", { courseid: courseId, userid: await getUserId() });
       return r.usergrades?.[0]?.gradeitems?.map((g: any) => ({
-        item: g.itemname, grade: g.gradeformatted, range: g.rangeformatted, percentage: g.percentageformatted,
+        item: g.itemname ?? "Total do curso", grade: g.gradeformatted, range: decode(g.rangeformatted ?? ""), percentage: g.percentageformatted,
       })) ?? [];
     }),
   );
 
   server.registerTool(
     "list_forum_discussions",
-    { description: "Recent discussions of a forum (use get_course_contents to find forum ids; id is the instance id from forums list).", inputSchema: { forumId: z.number().int() } },
+    { description: "Recent discussions of a forum. forumId is the `instance` of a forum module from get_course_contents (not its `id`).", inputSchema: { forumId: z.number().int() } },
     ({ forumId }) => safe(async () => {
       const r = await moodle.call<any>("mod_forum_get_forum_discussions", { forumid: forumId, perpage: 20 });
-      return r.discussions.map((d: any) => ({ id: d.discussion, name: d.name, author: d.userfullname, modified: iso(d.timemodified), message: d.message }));
+      return r.discussions.map((d: any) => ({ id: d.discussion, name: d.name, author: d.userfullname, modified: iso(d.timemodified), message: stripHtml(d.message)?.slice(0, 500) }));
     }),
   );
 
@@ -118,7 +129,7 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
     { description: "Unread/recent Moodle notifications for the user." },
     () => safe(async () => {
       const r = await moodle.call<any>("message_popup_get_popup_notifications", { useridto: await getUserId() });
-      return r.notifications.map((n: any) => ({ subject: n.subject, text: n.smallmessage, read: n.read, created: iso(n.timecreated), url: n.contexturl }));
+      return r.notifications.map((n: any) => ({ subject: n.subject, read: n.read, created: iso(n.timecreated), url: n.contexturl }));
     }),
   );
 }
