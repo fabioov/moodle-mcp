@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { MoodleClient } from "../moodle/client.js";
 import { MoodleError } from "../moodle/client.js";
+import { mergeDeadlines } from "./deadlines.js";
 
 const iso = (ts?: number) => (ts ? new Date(ts * 1000).toISOString() : null);
 const decode = (s: string) =>
@@ -94,13 +95,30 @@ export function registerTools(server: McpServer, moodle: MoodleClient): void {
 
   server.registerTool(
     "get_upcoming_deadlines",
-    { description: "Calendar action events (deadlines) in the next N days.", inputSchema: { days: z.number().int().min(1).max(365).default(14) } },
-    ({ days }) => safe(async () => {
+    {
+      description:
+        "Deadlines in the next N days: calendar events plus assignments, each assignment marked as submitted or pending. Sorted soonest first.",
+      inputSchema: { days: z.number().int().min(1).max(365).default(14), onlyPending: z.boolean().optional() },
+    },
+    ({ days, onlyPending }) => safe(async () => {
       const from = Math.floor(Date.now() / 1000);
-      const r = await moodle.call<any>("core_calendar_get_action_events_by_timesort", {
-        timesortfrom: from, timesortto: from + days * 86400, limitnum: 50,
-      });
-      return r.events.map((e: any) => ({ name: e.name.replace(/ está marcado\(a\) para esta data$/, ""), course: e.course?.fullname, due: iso(e.timesort), url: e.url, type: e.modulename }));
+      const to = from + days * 86400;
+      const [ev, as] = await Promise.all([
+        moodle.call<any>("core_calendar_get_action_events_by_timesort", { timesortfrom: from, timesortto: to, limitnum: 50 }),
+        moodle.call<any>("mod_assign_get_assignments", { courseids: [] }),
+      ]);
+      const items = mergeDeadlines(ev.events ?? [], as.courses ?? [], from, to);
+      const result = await Promise.all(items.map(async (d) => {
+        let status: string | undefined;
+        if (d.assignmentId) {
+          try {
+            const r = await moodle.call<any>("mod_assign_get_submission_status", { assignid: d.assignmentId });
+            status = r.lastattempt?.submission?.status === "submitted" ? "submitted" : "pending";
+          } catch { status = undefined; }
+        }
+        return { name: d.name, course: d.course, due: iso(d.due), type: d.type, status, url: d.url };
+      }));
+      return onlyPending ? result.filter((d) => d.status !== "submitted") : result;
     }),
   );
 
